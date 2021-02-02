@@ -56,7 +56,7 @@ module.exports = {
 
       builderOptions: {
         // options placed here will be merged with default configuration and passed to electron-builder
-        'appId': 'cc.seeed.sensecap.tools.hub_ng',
+        'appId': 'cc.seeed.sensecap.tools.hubng',
         'productName': 'SenseCAP Sensor Hub Configuration Tool',
         'copyright': 'Copyright ©2008-2020 Seeed Technology Co.,Ltd.',
         'nsis': {
