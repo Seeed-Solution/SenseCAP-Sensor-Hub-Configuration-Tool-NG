@@ -22,7 +22,7 @@ const { once, EventEmitter } = require('events')
 const { crc16kermit } = require('crc')
 const crypto = require('crypto')
 
-let appName = "SenseCAP Sensor Hub Configuration Tool"
+let appName = "SenseCAP Sensor Hub Configuration Tool NG"
 app.name = appName
 
 const logger = require("electron-log")
