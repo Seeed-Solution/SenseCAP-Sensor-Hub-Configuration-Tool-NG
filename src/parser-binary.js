@@ -34,7 +34,7 @@ class BinaryParser extends Transform {
 
     //search a frame then
     let start = this.buffer.indexOf(this.header)
-    if (start < 0) {
+    if (start < 0 && this.buffer.length > 2) {
       //no header found, drop all the buffer
       this.buffer = Buffer.alloc(0)
       cb()
