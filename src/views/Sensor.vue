@@ -12,7 +12,7 @@
       "respTimeout": "The longest time that the Hub will wait for, for the response from the sensor, before it retries. The unit is 100 milliseconds.",
       "startupTime": "The time of the startup process, after which the Hub will be capable to respond the Modbus command. The unit is 100 milliseconds.",
 
-      "measId": "For user defined sensors, the measurement ID is a integer, in range [5500, 5999].",
+      "measId": "For user defined sensors, the measurement ID is an integer, in range [5500, 5999] or [4097, 4999].",
       "registerAddr": "The starting address from which the measurement value is held. It's decimal number.",
       "dataType": "The data type determines how many registers will be read from the starting address, and in which format the Hub parses the data.",
       "precision": "The number of digits after the decimal point, it only controls the format of output, no scaling.",
@@ -80,7 +80,7 @@
     "Must between [128, 254]": "必须在[128, 254]范围内",
     "Must between [0x6000, 0x6150]": "必须在[0x6000, 0x6150]范围内",
     "Invalid HEX string": "无效的HEX字符串",
-    "Must between [5500, 5999]": "必须在[5500, 5999]范围内",
+    "Must between [5500, 5999] or [4097, 4999]": "必须在[5500, 5999]或[4097, 4999]范围内",
     "Maximum 20 non-whitespace chars allowed": "最多20个非空白字符",
     "Periodic": "周期供电型",
     "Always-On": "常电型",
@@ -139,7 +139,7 @@
       "respTimeout": "Hub向传感器发起读请求后，等待响应的超时时间，超时后重试，单位100毫秒。",
       "startupTime": "传感器从被通电，到能响应Modbus指令，需要等待的时长，单位100毫秒。",
 
-      "measId": "用户自定义传感器的测量值ID是一个整数，有效范围[5500, 5999]。",
+      "measId": "用户自定义传感器的测量值ID是一个整数，有效范围[5500, 5999]或[4097, 4999]。",
       "registerAddr": "测量值在传感器中的寄存器地址，整数。",
       "dataType": "数据类型决定了从传感器读取的寄存器个数，和以怎样的格式解析寄存器值。",
       "precision": "小数点后位数，仅影响格式，没有比例缩放作用。",
@@ -776,7 +776,7 @@ export default {
           return this.$t("Invalid HEX string")
         }
       },
-      rangeMeasId: value => (value >= 5500 && value <=5999) || this.$t("Must between [5500, 5999]"),
+      rangeMeasId: value => (value >= 5500 && value <=5999) || (value >= 4097 && value <=4999) || this.$t("Must between [5500, 5999] or [4097, 4999]"),
       int: value => (/\.+/.test(value)) ? this.$t("Must be integer.") : true,
       char20AllowEmtpy: value => {
         if (value) {
