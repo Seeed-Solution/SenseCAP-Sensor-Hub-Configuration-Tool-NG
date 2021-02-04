@@ -1052,11 +1052,10 @@ export default {
         }
         await ipcRenderer.invoke('binary-cmd-update-sensor-info', sinfo)
       }
+
       let who = 0
       if (sinfos === this.tableItemsUserDefined) who = 1
-      if (addrList.length > 0) {
-        await ipcRenderer.invoke('binary-cmd-update-sensor-enable-list', who, addrList)
-      }
+      await ipcRenderer.invoke('binary-cmd-update-sensor-enable-list', who, addrList)
     },
     writeFn() {
       this.statusText = this.$t("Reading protocol version ...")
