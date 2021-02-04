@@ -491,7 +491,9 @@ ipcMain.on('serial-close-req', (event, arg) => {
 
   serialClose(() => {
     clearTimeout(h)
+    menuContext = 'unknown'
     event.reply('serial-close-resp', {closed: true, reason: ''})
+    broadcastMultiWindows('menu-context', menuContext, win, winGeneral, winSensor)
   })
 })
 
@@ -607,7 +609,7 @@ async function switchMode(mode) {
 
     let h = setTimeout(() => {
       ee.emit('error', new Error('switching mode timeout'))
-    }, 15000)
+    }, 10000)
 
     let [modeNow] = await once(ee, 'menu-context-change')
     clearTimeout(h)

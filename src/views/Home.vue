@@ -223,7 +223,6 @@ export default {
       //hidden function
       logoClickCnt: 0,
       timeoutHandler: null,
-      hTimeoutOpenWin: null,
     }
   },
   computed: {
@@ -263,11 +262,7 @@ export default {
 
       this.generalSettingsLoading = true
       let self = this
-      this.hTimeoutOpenWin = setTimeout(() => {
-        self.hTimeoutOpenWin = null
-        self.generalSettingsLoading = false
-        console.log('open general setting window failed!')
-      }, 10000)
+
       ipcRenderer.invoke('enter-general-settings').then((result) => {
         if (result === 'general') {
           ipcRenderer.send('open-general-window')
@@ -279,13 +274,10 @@ export default {
           let s = this.$t('text: menu context home')
           this.term.write(`\r\n${s}\r\n`)
         } else {
+          errorMsg = errorMsg.replace(/Error invoking remote method.*?:\s/ig, '')
           this.term.write(`\r\n${errorMsg}\r\n`)
         }
       }).finally(() => {
-        if (this.hTimeoutOpenWin) {
-          clearTimeout(this.hTimeoutOpenWin)
-          this.hTimeoutOpenWin = null
-        }
         self.generalSettingsLoading = false
       })
     },
@@ -294,11 +286,6 @@ export default {
 
       this.sensorSettingsLoading = true
       let self = this
-      this.hTimeoutOpenWin = setTimeout(() => {
-        self.hTimeoutOpenWin = null
-        self.sensorSettingsLoading = false
-        console.log('open sensor setting window failed!')
-      }, 10000)
       ipcRenderer.invoke('enter-sensor-settings').then((result) => {
         if (result === 'sensor') {
           ipcRenderer.send('open-sensor-window')
@@ -310,13 +297,10 @@ export default {
           let s = this.$t('text: menu context home')
           this.term.write(`\r\n${s}\r\n`)
         } else {
+          errorMsg = errorMsg.replace(/Error invoking remote method.*?:\s/ig, '')
           this.term.write(`\r\n${errorMsg}\r\n`)
         }
       }).finally(() => {
-        if (this.hTimeoutOpenWin) {
-          clearTimeout(this.hTimeoutOpenWin)
-          this.hTimeoutOpenWin = null
-        }
         self.sensorSettingsLoading = false
       })
     },
@@ -332,6 +316,9 @@ export default {
         if (errorMsg.includes('the menu context should be at home')) {
           let s = this.$t('text: menu context home')
           this.term.write(`\r\n${s}\r\n`)
+        } else {
+          errorMsg = errorMsg.replace(/Error invoking remote method.*?:\s/ig, '')
+          this.term.write(`\r\n${errorMsg}\r\n`)
         }
       }).finally(() => {
         this.updateFwLoading = false
@@ -399,7 +386,7 @@ export default {
     this.term.onData((data) => {
       // the bootloader does echo-back
       // if (data === '\r') data = '\r\n'
-      this.term.write(data)
+      // this.term.write(data)
       ipcRenderer.send('xterm-input', data)
     })
 
