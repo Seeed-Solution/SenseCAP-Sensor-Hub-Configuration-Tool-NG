@@ -609,7 +609,7 @@ async function switchMode(mode) {
 
     let h = setTimeout(() => {
       ee.emit('error', new Error('switching mode timeout'))
-    }, 10000)
+    }, 15000)
 
     let [modeNow] = await once(ee, 'menu-context-change')
     clearTimeout(h)
@@ -1106,7 +1106,8 @@ ipcMain.handle('start-update-fw', async (event) => {
       if (toBeThrown) {
         throw toBeThrown
       }
-      // broadcastMultiWindows('update-fw-end', null, win)
+      menuContext = 'normal'
+      broadcastMultiWindows('menu-context', menuContext, win, winGeneral, winSensor)
       return 'ok'
     } else {
       throw new Error('firmware file is empty')
