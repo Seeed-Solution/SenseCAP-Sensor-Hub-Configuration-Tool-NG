@@ -999,6 +999,11 @@ export default {
       }).then((result) => {
         console.log('user defined sensor infos:', result)
         this.tableItemsUserDefined = JSON.parse(JSON.stringify(result))
+        if (this.tab === 'user') {
+          this.tableItems = this.tableItemsUserDefined
+        } else {
+          this.tableItems = this.tableItemsBuiltin
+        }
         if (this.tableItemsBuiltin.length > 0) {
           return ipcRenderer.invoke('binary-cmd-get-sensor-enable-list', 0)  //builtin enable list
         } else return []
