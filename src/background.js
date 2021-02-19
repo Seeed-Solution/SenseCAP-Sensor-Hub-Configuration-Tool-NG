@@ -623,11 +623,13 @@ async function switchMode(mode) {
 //TODO: menuContext
 ipcMain.handle('enter-general-settings', async (event) => {
   logger.info('handing', 'enter-general-settings', '...')
-  return await switchMode('1')
+  if (menuContext === 'general') return menuContext
+  else return await switchMode('1')
 })
 
 ipcMain.handle('enter-sensor-settings', async (event) => {
   logger.info('handing', 'enter-sensor-settings', '...')
+  if (menuContext === 'sensor') return menuContext
   let modeNow = await switchMode('3')
   if (modeNow === 'sensor') parserBin.turnOn()
   return modeNow

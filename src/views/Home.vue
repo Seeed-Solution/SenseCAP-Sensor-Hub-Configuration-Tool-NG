@@ -94,21 +94,21 @@
             <v-btn rounded color="secondary" width="200"
               @click.stop="openGeneralSettingFn()"
               :loading="generalSettingsLoading"
-              :disabled="btnDisabled"
+              :disabled="btnDisabledGeneral"
             >{{$t('General Settings')}}</v-btn>
           </v-col>
           <v-col cols="12" class="d-flex justify-space-around">
             <v-btn rounded color="secondary" width="200"
               @click.stop="openSensorSettingFn()"
               :loading="sensorSettingsLoading"
-              :disabled="btnDisabled"
+              :disabled="btnDisabledSensor"
             >{{$t('Sensor Settings')}}</v-btn>
           </v-col>
           <v-col cols="12" class="d-flex justify-space-around">
             <v-btn rounded color="secondary" width="200"
               @click.stop="updateFwFn()"
               :loading="updateFwLoading"
-              :disabled="btnDisabled"
+              :disabled="btnDisabledUpdateFw"
             >{{$t('Update Firmware')}}</v-btn>
           </v-col>
           <v-col cols="12" class="py-0 d-flex justify-start">
@@ -238,10 +238,21 @@ export default {
     serialVSelectDisable: function() {
       return this.serialOpened
     },
-    btnDisabled: function () {
+    btnDisabledGeneral: function () {
       return !this.serialOpened || !this.connectAsConfigMode || this.updateFwLoading ||
-        this.generalSettingsLoading || this.sensorSettingsLoading || this.menuContext !== 'home';
-    }
+        this.generalSettingsLoading || this.sensorSettingsLoading ||
+        (this.menuContext !== 'home' && this.menuContext !== 'general');
+    },
+    btnDisabledSensor: function () {
+      return !this.serialOpened || !this.connectAsConfigMode || this.updateFwLoading ||
+        this.generalSettingsLoading || this.sensorSettingsLoading ||
+        (this.menuContext !== 'home' && this.menuContext !== 'sensor');
+    },
+    btnDisabledUpdateFw: function () {
+      return !this.serialOpened || !this.connectAsConfigMode || this.updateFwLoading ||
+        this.generalSettingsLoading || this.sensorSettingsLoading ||
+        (this.menuContext !== 'home');
+    },
   },
   methods: {
     onSerialVSelectClicked() {

@@ -113,6 +113,10 @@
     "Initializing the writing of user defined sensor configuration ...": "正在初始化写入用户自定义传感器配置...",
     "Finishing the writing of user defined sensor configuration ...": "正在结束写入用户自定义传感器配置...",
     "The sensor configurations are written successfully.": "传感器配置被成功写入。",
+    "At least one measurement should be added, sensor modbus address: ": "至少需要配置1个测量值，传感器modbus地址：",
+    "At least one measurement should be added": "至少需要配置1个测量值",
+    "At most 16 measurements can be added, sensor modbus address: ": "一个传感器最多可以配置16个测量值，传感器modbus地址：",
+    "Invalid measurement configurations.": "传感器的测量值配置有问题。",
     "This address has been used.": "此地址已被占用。",
     "This measurement ID has been used.": "此测量值ID已被占用。",
     "The last test job will still run for": "上一个测试任务正在进行，仍需",
@@ -221,6 +225,7 @@
               <div class="text-subtitle-1">{{$t('Measurements')}}</div>
               <v-spacer></v-spacer>
               <el-button type="primary" size="mini" icon="el-icon-plus" round
+                :disabled="addMeasurementBtnDisabled"
                 @click="openMeasurementDialog('Add')"
               ></el-button>
               <el-button type="danger" size="mini" icon="el-icon-delete" round
@@ -916,6 +921,9 @@ export default {
     },
     showTestAgain: function() {
       return this.dialog3BtnText === this.$t('Close')
+    },
+    addMeasurementBtnDisabled: function () {
+      return Array.isArray(this.measurements) && this.measurements.length >= 16
     }
   },
   watch: {
@@ -926,10 +934,7 @@ export default {
       } else {
         this.tableItems = this.tableItemsBuiltin
       }
-      this.$refs['tbUserDefined'].setCurrentRow()
-      this.$refs['tbBuiltin'].setCurrentRow()
-      this.measEditingMbAddr = null
-      this.measurements = []
+      this.selectFirstRow()
     }
   },
   methods: {
@@ -1004,6 +1009,7 @@ export default {
         } else {
           this.tableItems = this.tableItemsBuiltin
         }
+        this.selectFirstRow()
         if (this.tableItemsBuiltin.length > 0) {
           return ipcRenderer.invoke('binary-cmd-get-sensor-enable-list', 0)  //builtin enable list
         } else return []
@@ -1048,6 +1054,20 @@ export default {
         this.readLoading = false
       })
     },
+    checkSensorInfos(sinfos) {
+      if (Array.isArray(sinfos)) {
+        for (const sinfo of sinfos) {
+          if (sinfo['measurements'].length === 0) {
+            this.statusText = this.$t('At least one measurement should be added, sensor modbus address: ') + sinfo['mbAddr']
+            return false
+          } else if (sinfo['measurements'].length > 16) {
+            this.statusText = this.$t('At most 16 measurements can be added, sensor modbus address: ') + sinfo['mbAddr']
+            return false
+          }
+        }
+        return true
+      } else return false
+    },
     async sendSensorInfos(sinfos) {
       let addrList = []
       for (const sinfo of sinfos) {
@@ -1063,6 +1083,10 @@ export default {
       await ipcRenderer.invoke('binary-cmd-update-sensor-enable-list', who, addrList)
     },
     writeFn() {
+      if (!this.checkSensorInfos(this.tableItemsUserDefined)) {
+        this.snackFail(this.$t('Invalid measurement configurations.'))
+        return false
+      }
       this.statusText = this.$t("Reading protocol version ...")
       this.writeLoading = true
       this.readProtoVersion().then((protoVersion) => {
@@ -1094,19 +1118,13 @@ export default {
         let enableAll = this.enableAllByDefault ? 1 : 0
         return ipcRenderer.invoke('binary-cmd-end-update', 0, parseInt(this.sinfoVerBuiltin), enableAll)
       }).then(() => {
-        if (this.tableItemsUserDefined.length > 0) {
-          this.statusText = this.$t('Initializing the writing of user defined sensor configuration ...')
-          return ipcRenderer.invoke('binary-cmd-start-update', 1)  //user defined sinfo version
-        }
+        this.statusText = this.$t('Initializing the writing of user defined sensor configuration ...')
+        return ipcRenderer.invoke('binary-cmd-start-update', 1)  //user defined sinfo version
       }).then(() => {
-        if (this.tableItemsUserDefined.length > 0) {
-          return this.sendSensorInfos(this.tableItemsUserDefined)
-        }
+        return this.sendSensorInfos(this.tableItemsUserDefined)
       }).then(() => {
-        if (this.tableItemsUserDefined.length > 0) {
-          this.statusText = this.$t('Finishing the writing of user defined sensor configuration ...')
-          return ipcRenderer.invoke('binary-cmd-end-update', 1, parseInt(this.sinfoVerUser), 0)
-        }
+        this.statusText = this.$t('Finishing the writing of user defined sensor configuration ...')
+        return ipcRenderer.invoke('binary-cmd-end-update', 1, parseInt(this.sinfoVerUser), 0)
       }).then(() => {
         this.statusText = this.$t('The sensor configurations are written successfully.')
       }).catch((error) => {
@@ -1185,6 +1203,13 @@ export default {
 
 
     //common
+    selectFirstRow() {
+      if (this.tableItems.length > 0) {
+        this.sensorsRowClick(this.tableItems[0], null, null)
+      } else {
+        this.measurements = []
+      }
+    },
     sensorsRowClick(row, column, event) {
       this.measEditingMbAddr = parseInt(row['mbAddr'])
       if (this.tab === 'user') {
@@ -1272,6 +1297,8 @@ export default {
         this.tableItems.push(item)
       }
 
+      this.sensorsRowClick(item, null, null)
+
       if (this.tab === 'user') this.handleCheckOneUserDefinedChange(true)
       this.dialog = false
     },
@@ -1282,6 +1309,7 @@ export default {
       } else {
         selection = []
       }
+      let shouldRefreshMeas = false
       for (const item of selection) {
         console.log('going to delete sensor: mbaddr ', item['mbAddr'])
         let index = this.tableItems.indexOf(item)
@@ -1290,8 +1318,11 @@ export default {
         }
         //if measurements are shown, clear measurements
         if (parseInt(item['mbAddr']) === parseInt(this.measEditingMbAddr)) {
-          this.measurements = []
+          shouldRefreshMeas = true
         }
+      }
+      if (shouldRefreshMeas) {
+        this.selectFirstRow()
       }
     },
     loadMeasurements() {
@@ -1448,6 +1479,10 @@ export default {
       }
 
       if (sinfo) {
+        if (sinfo['measurements'].length === 0) {
+          this.snackFail(this.$t('At least one measurement should be added'))
+          return false
+        }
         this.doTest(sinfo)
       }
       else {
@@ -1488,6 +1523,7 @@ export default {
           } else {
             this.tableItems = this.tableItemsBuiltin
           }
+          this.selectFirstRow()
         }
       }).catch((error) => {
         console.log(error)
