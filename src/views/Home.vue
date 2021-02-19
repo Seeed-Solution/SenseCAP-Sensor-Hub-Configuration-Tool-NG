@@ -390,6 +390,17 @@ export default {
       ipcRenderer.send('xterm-input', data)
     })
 
+    this.term.attachCustomKeyEventHandler(e => {
+      //for windows, copy and paste via intuitive hotkey
+      //since we don't need terminal features, we can release these hotkeys
+      if (e.key === 'c' && e.ctrlKey) {
+        return false
+      }
+      if (e.key === 'v' && e.ctrlKey) {
+        return false
+      }
+    })
+
     //serial
     ipcRenderer.on('init-serial-resp', (event, arg) => {
       console.log('init-serial-resp:', arg)
