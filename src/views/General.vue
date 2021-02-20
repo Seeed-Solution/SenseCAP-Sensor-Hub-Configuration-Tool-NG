@@ -462,10 +462,10 @@ export default {
         // this.deviceType = found[1]
         return
       }
-      found = line.match(/Device EUI:\s+(\w+)/i)
+      found = line.match(/(Device EUI|# EUI):\s?(\w+)/i)
       if (found) {
-        console.log('found device EUI:', found[1])
-        this.deviceEUI = found[1]
+        console.log('found device EUI:', found[2])
+        this.deviceEUI = found[2]
         this.deviceEUI2 = this.deviceEUI
         return
       }
@@ -482,7 +482,7 @@ export default {
         this.appEUI2 = this.appEUI
         return
       }
-      found = line.match(/(App Key|Key B):\s+(\w+)/i)
+      found = line.match(/(App Key|Key B|APPKEY):\s+(\w+)/i)
       if (found) {
         console.log('found App Key:', found[2])
         this.appKey = found[2]
@@ -507,14 +507,20 @@ export default {
         this.signalRssi = found[1]
         return
       }
-      found = line.match(/Data interval:\s+(\w+)/i)
+      found = line.match(/(Data interval|PERIOD):\s?(\d+)/i)
       if (found) {
-        console.log('found Data interval:', found[1])
-        this.dataInterval = parseInt(found[1])
+        console.log('found Data interval:', found[2])
+        this.dataInterval = parseInt(found[2])
         this.dataInterval2 = this.dataInterval
         return
       }
       found = line.match(/Battery:\s+(\w+)%/i)
+      if (found) {
+        console.log('found Battery:', found[1])
+        this.battery = parseInt(found[1])
+        return
+      }
+      found = line.match(/Battery status\[\d+mv,\s?(\w+)%/i)
       if (found) {
         console.log('found Battery:', found[1])
         this.battery = parseInt(found[1])
@@ -565,6 +571,15 @@ export default {
         this.enableOtaPrepub2 = this.enableOtaPrepub
         return
       }
+      found = line.match(/SWITCH:\[GPS:(\d),\s?OTA:(\d)/i)
+      if (found) {
+        console.log(`found SWITCH, GPS: ${found[1]}, OTA Preview: ${found[2]}`)
+        this.enableGps = found[1] === '1' ? true : false
+        this.enableGps2 = this.enableGps
+        this.enableOtaPrepub = found[2] === '1' ? true : false
+        this.enableOtaPrepub2 = this.enableOtaPrepub
+        return
+      }
       found = line.match(/APN:\s+(\w+)/i)
       if (found) {
         console.log('found APN:', found[1])
@@ -586,16 +601,16 @@ export default {
         this.apnPassword2 = this.apnPassword
         return
       }
-      found = line.match(/Hardware Version:\s?([vV0-9.]+)/i)
+      found = line.match(/(Hardware Version|HW VER):\s?([vV0-9.]+)/i)
       if (found) {
-        console.log('found Hardware version:', found[1])
-        this.hwVer = found[1]
+        console.log('found Hardware version:', found[2])
+        this.hwVer = found[2]
         return
       }
-      found = line.match(/Software Version:\s?([vV0-9.]+)/i)
+      found = line.match(/(Software Version|APP VER):\s?([vV0-9.]+)/i)
       if (found) {
-        console.log('found Software firmware:', found[1])
-        this.swVer = found[1]
+        console.log('found Software firmware:', found[2])
+        this.swVer = found[2]
         return
       }
 
