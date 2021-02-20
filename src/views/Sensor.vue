@@ -80,6 +80,7 @@
     "Must between [128, 254]": "必须在[128, 254]范围内",
     "Must between [0x6000, 0x6150]": "必须在[0x6000, 0x6150]范围内",
     "Invalid HEX string": "无效的HEX字符串",
+    "Must be nonnegative integer.": "必须是正整数",
     "Must between [5500, 5999] or [4097, 4999]": "必须在[5500, 5999]或[4097, 4999]范围内",
     "Maximum 20 non-whitespace chars allowed": "最多20个非空白字符",
     "Periodic": "周期供电型",
@@ -452,7 +453,7 @@
                   </v-tooltip>
                 </p>
                 <v-text-field v-model="dgSensor['measDelay']"
-                  :rules="[rules.required, rules.int]"
+                  :rules="[rules.rangeGEZero]"
                   :suffix="$t('seconds')"
                   type="number"
                   outlined dense
@@ -469,7 +470,7 @@
                   </v-tooltip>
                 </p>
                 <v-text-field v-model="dgSensor['respTimeout']"
-                  :rules="[rules.required, rules.int]"
+                  :rules="[rules.rangeGEZero]"
                   :suffix="'x100 ' + $t('milliseconds')"
                   type="number"
                   outlined dense
@@ -486,7 +487,7 @@
                   </v-tooltip>
                 </p>
                 <v-text-field v-model="dgSensor['startupTime']"
-                  :rules="[rules.required, rules.int]"
+                  :rules="[rules.rangeGEZero]"
                   :suffix="'x100 ' + $t('milliseconds')"
                   type="number"
                   outlined dense
@@ -779,6 +780,13 @@ export default {
           return (v >= 0x6000 && v <= 0x6150) || this.$t("Must between [0x6000, 0x6150]")
         } else {
           return this.$t("Invalid HEX string")
+        }
+      },
+      rangeGEZero: value => {
+        if (/^(0|[1-9][0-9]*)$/i.test(value)) {
+          return true
+        } else {
+          return this.$t("Must be nonnegative integer.")
         }
       },
       rangeMeasId: value => (value >= 5500 && value <=5999) || (value >= 4097 && value <=4999) || this.$t("Must between [5500, 5999] or [4097, 4999]"),
