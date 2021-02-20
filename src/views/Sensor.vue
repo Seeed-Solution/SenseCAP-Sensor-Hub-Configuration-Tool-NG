@@ -158,6 +158,7 @@
     },
     "text: wait test": "Hub正在探测和测试传感器，请等待",
     "text: cancel test": "这个操作仅会关闭测试对话框，传感器测试将在后台继续进行，且在完成之前Hub不响应任何指令。",
+    "Please don't do test while reading/writing!": "请不要在读写设备时测试传感器！",
 
     "end": "结束"
   }
@@ -1487,6 +1488,10 @@ export default {
     testMeasurement(row) {
       if (this.testCountdown > 0) {
         this.snackFail(this.$t('The last test job will still run for') + ` ${this.testCountdown} ` + this.$t('seconds'))
+        return false
+      }
+      if (this.writeLoading || this.readLoading) {
+        this.snackFail(this.$t("Please don't do test while reading/writing!"))
         return false
       }
 
