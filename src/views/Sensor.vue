@@ -216,7 +216,10 @@
                 <el-table-column :label="$t('Test')" align="center" width="50">
                   <template slot-scope="scope">
                     <span style="cursor:pointer;" @click.stop="testMeasurement(scope.row)">
-                      <v-icon>mdi-test-tube</v-icon>
+                      <v-progress-circular v-if="testingIsGoing && testingAddr === scope.row.mbAddr"
+                        indeterminate size="16" width="1" color="red"
+                      ></v-progress-circular>
+                      <v-icon v-else color="blue">mdi-test-tube</v-icon>
                     </span>
                   </template>
                 </el-table-column>
@@ -304,7 +307,10 @@
                 <el-table-column :label="$t('Test')" align="center" width="50">
                   <template slot-scope="scope">
                     <span style="cursor:pointer;" @click.stop="testMeasurement(scope.row)">
-                      <v-icon>mdi-test-tube</v-icon>
+                      <v-progress-circular v-if="testingIsGoing && testingAddr === scope.row.mbAddr"
+                        indeterminate size="16" width="1" color="red"
+                      ></v-progress-circular>
+                      <v-icon v-else color="blue">mdi-test-tube</v-icon>
                     </span>
                   </template>
                 </el-table-column>
@@ -932,6 +938,9 @@ export default {
     },
     addMeasurementBtnDisabled: function () {
       return Array.isArray(this.measurements) && this.measurements.length >= 16
+    },
+    testingIsGoing: function () {
+      return this.testCountdown > 0
     }
   },
   watch: {
@@ -973,6 +982,10 @@ export default {
       return sensors
     },
     readFn() {
+      if (this.testCountdown > 0) {
+        this.snackFail(this.$t('The last test job will still run for') + ` ${this.testCountdown} ` + this.$t('seconds'))
+        return false
+      }
       this.statusText = this.$t("Reading protocol version ...")
       this.readLoading = true
       this.readProtoVersion().then((protoVersion) => {
@@ -1093,6 +1106,10 @@ export default {
     writeFn() {
       if (!this.checkSensorInfos(this.tableItemsUserDefined)) {
         this.snackFail(this.$t('Invalid measurement configurations.'))
+        return false
+      }
+      if (this.testCountdown > 0) {
+        this.snackFail(this.$t('The last test job will still run for') + ` ${this.testCountdown} ` + this.$t('seconds'))
         return false
       }
       this.statusText = this.$t("Reading protocol version ...")

@@ -705,7 +705,7 @@ async function binaryCmdDevRequest (cmd, payload, timeoutMs=2000) {
     if (updating) {
       throw new Error('skip this request during fw updating')
     }
-    logger.debug(`send binary cmd: 0x${cmd.toString(16)},`, payload)
+    logger.debug(`send binary cmd: 0x${cmd.toString(16)},`)
     let frame = encodeBinaryFrame(cmd, payload)
     logger.debug(`encoded frame:`, frame.toString('hex'))
     serial.write(frame)
@@ -950,7 +950,7 @@ ipcMain.handle('binary-cmd-update-sensor-info', async (event, sinfo) => {
   let frame = buildSensorInfoFrame(sinfo)
 
   logger.info(`frame is built, length is ${frame.length}`)
-  logger.debug(frame)
+  logger.debug(frame.toString('hex'))
   await binaryCmdRequestAsync(0x15, frame)
   return 'ok'
 })
@@ -977,7 +977,7 @@ ipcMain.handle('binary-cmd-test-sensor-info', async (event, sinfo) => {
   let frame = buildSensorInfoFrame(sinfo)
 
   logger.info(`frame is built, length is ${frame.length}`)
-  logger.debug(frame)
+  logger.debug(frame.toString('hex'))
   await binaryCmdRequestAsync(0x20, frame)
   return 'ok'
 })
