@@ -1203,6 +1203,8 @@ export default {
     },
     userDefinedMeasRowDbClick(row, column, event) {
       this.dgMeas = JSON.parse(JSON.stringify(row))
+      this.dgMeas['dataFactorA'] = this.formatFloat(null, null, row['dataFactorA'])
+      this.dgMeas['dataFactorB'] = this.formatFloat(null, null, row['dataFactorB'])
       this.openMeasurementDialog('Modify')
     },
 
