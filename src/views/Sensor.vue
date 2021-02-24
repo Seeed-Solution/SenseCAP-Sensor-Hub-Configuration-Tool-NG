@@ -78,6 +78,7 @@
     "Result": "测试结果",
     "Are you sure to close the test dialog?": "您确定要关闭测试对话框吗？",
     "Must between [128, 254]": "必须在[128, 254]范围内",
+    "Invalid modbus register address.": "无效的modbus寄存器地址",
     "Must between [0x6000, 0x6150]": "必须在[0x6000, 0x6150]范围内",
     "Invalid HEX string": "无效的HEX字符串",
     "Must be nonnegative integer.": "必须是正整数",
@@ -559,7 +560,7 @@
                   </v-tooltip>
                 </p>
                 <v-text-field v-model="dgMeas['readRegAddr']"
-                  :rules="[rules.requiredWithZero, rules.int]"
+                  :rules="[rules.rangeModbusReg, rules.int]"
                   type="number"
                   outlined dense
                 ></v-text-field>
@@ -781,6 +782,7 @@ export default {
       required: value => !!value || this.$t("Required."),
       requiredWithZero: value => !!value || parseFloat(value) === 0 || this.$t("Required."),
       rangeModbus: value => (value >= 128 && value <=254) || this.$t("Must between [128, 254]"),
+      rangeModbusReg: value => (value >= 0 && value <=65535) || this.$t("Invalid modbus register address."),
       rangeSensorTypeId: value => {
         if (/^[0-9a-f]+$/i.test(value)) {
           const v = parseInt('0x' + value)
