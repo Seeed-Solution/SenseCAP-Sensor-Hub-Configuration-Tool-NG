@@ -34,12 +34,14 @@
 
     "Must between [5, 43200]": "必须在[5, 43200]范围内",
     "Must between [5, 720]": "必须在[5, 720]范围内",
+    "Must between [1, 1440]": "必须在[1, 1440]范围内",
     "Must between [1, 43200]": "必须在[1, 43200]范围内",
     "Must between [1, 65535]": "必须在[1, 65535]范围内",
     "Invalid LoRaWAN EUI (16 chars)": "无效的LoRaWAN EUI (16字符)",
     "Invalid LoRaPP EUI (32 chars)": "无效的LoRaPP EUI (32字符)",
     "Invalid domain": "不正确的域名格式",
     "Maximum 32 chars allowed": "最多32个(非空白)字符",
+    "Maximum 31 chars allowed": "最多31个(非空白)字符",
 
     "end": "结束"
   }
@@ -105,13 +107,13 @@
           </v-col>
           <v-col cols="6" class="py-0">
             <v-text-field v-model="username" :label="$t('Username')"
-              :rules="[rules.char32AllowEmtpy]"
+              :rules="[rules.char31AllowEmtpy]"
               outlined dense>
             </v-text-field>
           </v-col>
           <v-col cols="6" class="py-0">
             <v-text-field v-model="password" :label="$t('Password')"
-              :rules="[rules.char32AllowEmtpy]"
+              :rules="[rules.char31AllowEmtpy]"
               outlined dense>
             </v-text-field>
           </v-col>
@@ -129,19 +131,19 @@
           <!-- APN for 4G -->
           <v-col cols="6" class="py-0">
             <v-text-field v-model="apn" :label="$t('APN')"
-              :rules="[rules.char32AllowEmtpy]" outlined dense>
+              :rules="[rules.char31AllowEmtpy]" outlined dense>
             </v-text-field>
           </v-col>
           <v-col cols="6" class="py-0"></v-col>
           <v-col cols="6" class="py-0">
             <v-text-field v-model="apnUsername" :label="$t('APN Username')"
-              :rules="[rules.char32AllowEmtpy]"
+              :rules="[rules.char31AllowEmtpy]"
               outlined dense>
             </v-text-field>
           </v-col>
           <v-col cols="6" class="py-0">
             <v-text-field v-model="apnPassword" :label="$t('APN Password')"
-              :rules="[rules.char32AllowEmtpy]"
+              :rules="[rules.char31AllowEmtpy]"
               outlined dense>
             </v-text-field>
           </v-col>
@@ -216,13 +218,17 @@ export default {
       required: value => !!value || this.$t("Required."),
       rangeWAN: value => (value >= 5 && value <=43200) || this.$t("Must between [5, 43200]"),
       rangePP: value => (value >= 5 && value <=720) || this.$t("Must between [5, 720]"),
-      rangeSH: value => (value >= 1 && value <=43200) || this.$t("Must between [1, 43200]"),
+      rangeSH: value => (value >= 1 && value <=1440) || this.$t("Must between [1, 1440]"),
       rangePort: value => (value >= 1 && value <=65535) || this.$t("Must between [1, 65535]"),
       int: value => (/\.+/.test(value)) ? this.$t("Must be integer.") : true,
       eui16: value => (/^\w{16}$/.test(value)) || this.$t("Invalid LoRaWAN EUI (16 chars)"),
       eui32: value => (/^\w{32}$/.test(value)) || this.$t("Invalid LoRaPP EUI (32 chars)"),
       char32AllowEmtpy: value => {
         if (value) return (/^\S{1,32}$/i.test(value)) || this.$t("Maximum 32 chars allowed")
+        else return true
+      },
+      char31AllowEmtpy: value => {
+        if (value) return (/^\S{1,31}$/i.test(value)) || this.$t("Maximum 31 chars allowed")
         else return true
       },
       domain: value => (/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(value)) || (/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(value)) || this.$t("Invalid domain"),
@@ -526,7 +532,7 @@ export default {
         this.battery = parseInt(found[1])
         return
       }
-      found = line.match(/Remote server:\s+([a-z0-9-_.]+)/i)
+      found = line.match(/Remote server:\s+(\S+)/i)
       if (found) {
         console.log('found remote server:', found[1])
         this.serverAddr = found[1]
@@ -536,21 +542,21 @@ export default {
       } else {
         this.serverPortRules = []
       }
-      found = line.match(/Remote port:\s+(\w+)/i)
+      found = line.match(/Remote port:\s+(\d+)/i)
       if (found) {
         console.log('found remote port:', found[1])
         this.serverPort = parseInt(found[1])
         this.serverPort2 = this.serverPort
         return
       }
-      found = line.match(/User:\s+([a-z0-9-_.]+)/i)
+      found = line.match(/User:\s+(\S+)/i)
       if (found) {
         console.log('found username:', found[1])
         this.username = found[1]
         this.username2 = this.username
         return
       }
-      found = line.match(/Passwd:\s+([a-z0-9-_.]+)/i)
+      found = line.match(/Passwd:\s+(\S+)/i)
       if (found) {
         console.log('found password:', found[1])
         this.password = found[1]
@@ -564,7 +570,7 @@ export default {
         this.enableGps2 = this.enableGps
         return
       }
-      found = line.match(/OTA preview:\s+(\w+)/i)
+      found = line.match(/^# OTA preview:\s+(\w+)/i)
       if (found) {
         console.log('found OTA preview:', found[1])
         this.enableOtaPrepub = found[1] === 'Y' ? true : false
@@ -580,21 +586,21 @@ export default {
         this.enableOtaPrepub2 = this.enableOtaPrepub
         return
       }
-      found = line.match(/APN:\s+(\w+)/i)
+      found = line.match(/APN:\s+(\S+)/i)
       if (found) {
         console.log('found APN:', found[1])
         this.apn = found[1]
         this.apn2 = this.apn
         return
       }
-      found = line.match(/APN username:\s+(\w+)/i)
+      found = line.match(/APN username:\s+(\S+)/i)
       if (found) {
         console.log('found APN username:', found[1])
         this.apnUsername = found[1]
         this.apnUsername2 = this.apnUsername
         return
       }
-      found = line.match(/APN password:\s+(\w+)/i)
+      found = line.match(/APN password:\s+(\S+)/i)
       if (found) {
         console.log('found APN password:', found[1])
         this.apnPassword = found[1]
