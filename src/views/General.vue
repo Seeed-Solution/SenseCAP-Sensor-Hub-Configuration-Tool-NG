@@ -532,12 +532,13 @@ export default {
         this.battery = parseInt(found[1])
         return
       }
-      found = line.match(/Remote server:\s+(\S+)/i)
+      found = line.match(/Remote server:\s+(\S*)/i)
       if (found) {
         console.log('found remote server:', found[1])
         this.serverAddr = found[1]
         this.serverAddr2 = this.serverAddr
-        this.serverPortRules = [this.rules.rangePort]
+        if (this.serverAddr.trim().length > 0) this.serverPortRules = [this.rules.rangePort]
+        else this.serverPortRules = []
         return
       } else {
         this.serverPortRules = []
@@ -549,14 +550,14 @@ export default {
         this.serverPort2 = this.serverPort
         return
       }
-      found = line.match(/User:\s+(\S+)/i)
+      found = line.match(/User:\s+(\S*)/i)
       if (found) {
         console.log('found username:', found[1])
         this.username = found[1]
         this.username2 = this.username
         return
       }
-      found = line.match(/Passwd:\s+(\S+)/i)
+      found = line.match(/Passwd:\s+(\S*)/i)
       if (found) {
         console.log('found password:', found[1])
         this.password = found[1]
@@ -586,21 +587,21 @@ export default {
         this.enableOtaPrepub2 = this.enableOtaPrepub
         return
       }
-      found = line.match(/APN:\s+(\S+)/i)
+      found = line.match(/APN:\s+(\S*)/i)
       if (found) {
         console.log('found APN:', found[1])
         this.apn = found[1]
         this.apn2 = this.apn
         return
       }
-      found = line.match(/APN username:\s+(\S+)/i)
+      found = line.match(/APN username:\s+(\S*)/i)
       if (found) {
         console.log('found APN username:', found[1])
         this.apnUsername = found[1]
         this.apnUsername2 = this.apnUsername
         return
       }
-      found = line.match(/APN password:\s+(\S+)/i)
+      found = line.match(/APN password:\s+(\S*)/i)
       if (found) {
         console.log('found APN password:', found[1])
         this.apnPassword = found[1]
