@@ -3,7 +3,7 @@
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { app, protocol, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-const SerialPort = require('serialport')
+const { SerialPort } = require('serialport')
 const Menu = require("electron-create-menu")
 import i18next from 'i18next'
 const { autoUpdater } = require("electron-updater")
@@ -15,7 +15,7 @@ const fsPromises = fs.promises
 const Store = require('electron-store')
 const store = new Store()
 const { Readable } = require('stream')
-const ReadlineParser = require('@serialport/parser-readline')
+const { ReadlineParser } = require('@serialport/parser-readline')
 const { BinaryParser } = require('./parser-binary')
 const dateFormat = require('dateformat')
 const { once, EventEmitter } = require('events')
