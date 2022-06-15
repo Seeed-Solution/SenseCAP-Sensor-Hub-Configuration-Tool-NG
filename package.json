@@ -1,7 +1,7 @@
 {
   "name": "sensecap_sensorhub_cfg_tool_ng",
   "description": "SenseCAP Sensor Hub Configuration Tool NG",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "homepage": "https://github.com/Seeed-Solution/SenseCAP-Sensor-Hub-Configuration-Tool-NG",
   "repository": {
     "type": "git",
