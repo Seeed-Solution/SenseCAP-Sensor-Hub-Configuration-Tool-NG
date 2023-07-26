@@ -67,6 +67,9 @@ let binCmdQueue = []
 //other global var
 let menuContext = 'unknown'
 let autoUpdateTimeHandler = null
+let exportFileName =''
+let startReadMeasuredData =false
+let writerStream
 
 /**
  * The Menu's locale only follows the system, the user selection from the GUI doesn't affect
@@ -524,6 +527,7 @@ async function sendToTerm(str) {
 // ASCII Protocol
 function parseLine(line) {
   logger.debug(`parseLine: ${line}`)
+  let line_ram = line
   line = line.trim()
 
   let found
@@ -547,6 +551,7 @@ function parseLine(line) {
         serial.write('c')
       }
     }
+    startReadMeasuredData = false;
     return
   }
 
@@ -590,7 +595,31 @@ function parseLine(line) {
     ee.emit('menu-context-change', menuContext)
     return
   }
+
+  found = line.match(/start read measurement data/i)
+  if( found  && (exportFileName != '') ) {
+    logger.debug('start read measurement data')
+    startReadMeasuredData = true;
+    winGeneral.webContents.send('export-measured-data-end', true)
+    writerStream = fs.createWriteStream(exportFileName);
+    return 
+  }
+
+  found = line.match(/end read measurement data/i)
+  if( found  &&  startReadMeasuredData ) {
+    logger.debug('end read measurement data')
+    startReadMeasuredData = false;
+    winGeneral.webContents.send('export-measured-data-end', false)
+    exportFileName = ''
+    writerStream.end();
+    return  
+  }
+  if( startReadMeasuredData ==  true) {
+
+    writerStream.write(line_ram,'UTF8');
+  }
 }
+
 
 parser.on('data', (line) => {
   parseLine(line)
@@ -1231,6 +1260,43 @@ ipcMain.handle('save-to-file', async (event, configProfileJson) => {
       logger.debug(error)
       throw new Error('write file error')
     }
+  } else {
+    return 'canceled'
+  }
+})
+
+
+ipcMain.handle('read-measured-data', async (event, data) => {
+
+  logger.info('handle read-measured-data call ...')
+
+  exportFileName ='';
+
+  let now = new Date()
+  let datetimeStr = dateFormat(now, "yyyymmdd-HHMMss")
+  let path = `Measurement-Data-${datetimeStr}.csv`
+
+  let {canceled, filePath} = await dialog.showSaveDialog({
+    defaultPath: path,
+    filters: [
+      { name: 'CSV Files', extensions: ['csv'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['createDirectory']
+  })
+  if (!canceled) {
+    if (!filePath) throw new Error('saveDialog get empty filePath.')
+
+    if (serial && serial.isOpen && ['general'].includes(menuContext)) {
+      serial.write(data);
+      await delayMs(500)
+      serial.write('Y\r\n')
+
+      exportFileName  = filePath;
+      startReadMeasuredData = false;
+      return 'succ'
+    }
+    return 'canceled'
   } else {
     return 'canceled'
   }
