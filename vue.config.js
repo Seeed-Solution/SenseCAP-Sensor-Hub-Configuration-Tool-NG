@@ -12,7 +12,7 @@ module.exports = {
       filename: 'index.html',
       // when using title option,
       // template title tag needs to be <title><%= htmlWebpackPlugin.options.title %></title>
-      title: 'SenseCAP Sensor Hub Configuration Tool NG',
+      title: 'Sensor Hub Configuration Tool NG',
       // chunks to include on this page, by default includes
       // extracted common chunks and vendor chunks.
       chunks: ['index']
@@ -21,14 +21,14 @@ module.exports = {
       entry: 'src/main-general.js',
       template: 'public/index.html',
       filename: 'general.html',
-      title: 'SenseCAP Sensor Hub Configuration Tool NG - General',
+      title: 'Sensor Hub Configuration Tool NG - General',
       chunks: ['general']
     },
     sensor: {
       entry: 'src/main-sensor.js',
       template: 'public/index.html',
       filename: 'sensor.html',
-      title: 'SenseCAP Sensor Hub Configuration Tool NG - Sensor',
+      title: 'Sensor Hub Configuration Tool NG - Sensor',
       chunks: ['sensor']
     },
   },
@@ -57,8 +57,8 @@ module.exports = {
       builderOptions: {
         // options placed here will be merged with default configuration and passed to electron-builder
         'appId': 'cc.seeed.sensecap.tools.hubng',
-        'productName': 'SenseCAP Sensor Hub Configuration Tool NG',
-        'copyright': 'Copyright ©2008-2020 Seeed Technology Co.,Ltd.',
+        'productName': 'Sensor Hub Configuration Tool NG',
+        // 'copyright': 'Copyright ©2008-2020 Seeed Technology Co.,Ltd.',
         'nsis': {
           'installerIcon': 'build/icon.ico',
           'installerHeader': 'build/icon.png',
@@ -88,7 +88,7 @@ module.exports = {
           'icon': 'build/icon.ico',
         },
         'dmg': {
-          'title': 'SenseCAP Sensor Hub Configuration Tool NG',
+          'title': 'Sensor Hub Configuration Tool NG',
           'icon': 'build/icon.png',
           'contents': [
             {
