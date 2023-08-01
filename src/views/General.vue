@@ -2,7 +2,7 @@
 {
   "en": {
     "text: connectAsConfigMode": "Enter configuration mode automatically on device's booted",
-    "text: clear data confirm": "This will clear all the storaged measurements in the flash. Once confirmed, the bootloader will launch the Application Firmware and storaged measurements will be wiped out.",
+    "text: clear data confirm": "This will clear all the storaged measurements in the flash. Once confirmed, storaged measurements will be wiped out.",
     "Maximum 32 chars allowed": "Maximum 32 non-whitespace chars",
     "end": "end"
   },
@@ -25,9 +25,10 @@
     "Software Version": "软件版本",
     "Read": "读取",
     "Write": "写入",
+    "Export Data": "导出缓存数据",
     "Update Fw": "更新固件",
-    "Clear Data": "清空数据存储",
-    "text: clear data confirm": "这个操作将会清空存储在Flash中的测量数据，点击\"清空\"后，设备将退出配置模式，进入正常工作模式，并执行清空操作。",
+    "Clear Data": "清空缓存数据",
+    "text: clear data confirm": "这个操作将会清空存储在Flash中的测量数据，点击\"清空\"后，执行清空操作。",
     "Do it": "清空",
     "Connect": "连接",
     "Disconnect": "断开",
@@ -166,6 +167,10 @@
               @click.stop="writeFn()"
               :loading="writeLoading"
               :disabled="btnDisabled">{{$t('Write')}}</v-btn>
+            <v-btn rounded color="secondary" width="150" class="mr-5"
+              @click.stop="exportMeasuredFileFn()"
+              :loading="exportMeasuredLoading"
+              :disabled="btnDisabled">{{$t('Export Data')}}</v-btn>
             <v-btn rounded color="secondary" width="150" class="mr-1"
               @click.stop="ClearDataFn()"
               :loading="clearCacheLoading"
@@ -246,6 +251,7 @@ export default {
       writeLoading: false,
       updateFwLoading: false,
       clearCacheLoading: false,
+      exportMeasuredLoading: false,
       //
       serialOpened: false,
       showHiddenCfg: false,
@@ -445,6 +451,20 @@ export default {
       .finally(() => {
         this.pauseParseLine = false
         this.writeLoading = false
+      })
+    },
+    exportMeasuredFileFn() {
+
+      if( this.exportMeasuredLoading ) {
+        return
+      }
+      ipcRenderer.invoke('read-measured-data', "x").then((result) => {
+        if (result === 'canceled') {
+          return;
+        }
+      }).catch((error) => {
+        console.log('save to file error:', error)
+      }).finally(() => {
       })
     },
     ClearDataFn() {
@@ -700,6 +720,10 @@ export default {
     //menu context
     ipcRenderer.on('menu-context', (event, arg) => {
       this.menuContext = arg
+    }),
+
+    ipcRenderer.on('export-measured-data-end', (event, arg) => {
+      this.exportMeasuredLoading = arg
     })
   },
   beforeDestroy() {

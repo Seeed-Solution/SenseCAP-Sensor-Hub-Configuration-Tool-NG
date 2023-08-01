@@ -156,7 +156,7 @@
       </v-col>
       <v-col class="d-flex justify-center">
         <div>
-          <v-img src="../assets/sensecap.png" width="100px" @click.stop="logoClicked()"></v-img>
+          <v-img src="../assets/sensecap.png" width="32px" @click.stop="logoClicked()"></v-img>
         </div>
       </v-col>
       <v-col cols="auto" class="d-flex flex-column align-center justify-center caption grey--text">
