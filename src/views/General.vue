@@ -170,7 +170,7 @@
             <v-btn rounded color="secondary" width="150" class="mr-5"
               @click.stop="exportMeasuredFileFn()"
               :loading="exportMeasuredLoading"
-              :disabled="btnDisabled">{{$t('Export Measured Data')}}</v-btn>
+              :disabled="btnDisabled">{{$t('Export Data')}}</v-btn>
             <v-btn rounded color="secondary" width="150" class="mr-1"
               @click.stop="ClearDataFn()"
               :loading="clearCacheLoading"
