@@ -43,7 +43,8 @@
     "Invalid domain": "不正确的域名格式",
     "Maximum 32 chars allowed": "最多32个(非空白)字符",
     "Maximum 31 chars allowed": "最多31个(非空白)字符",
-
+    "CO2 Interval":"CO2上报周期",
+    "CO2 Interval is a multiple of the Data Interval,Please enter the multiple value.":"CO2上报周期与主上报周期是倍数关系,请在这里输入倍数值",
     "end": "结束"
   }
 }
@@ -79,6 +80,13 @@
             </v-text-field>
             <v-icon class="align-self-start mt-2 ml-2" color="black">mdi-signal-cellular-{{signalIndex}}</v-icon>
           </v-col>
+          <!-- battery info -->
+          <v-col cols="6"  class="py-0">
+            <v-text-field v-model.number="battery" type="number" :label="$t('Battery')"
+              suffix="%" disabled outlined dense>
+            </v-text-field>
+          </v-col>
+          <v-col cols="6" class="py-0"></v-col>
           <!-- interval -->
           <v-col cols="6" class="py-0">
             <v-text-field v-model.number="dataInterval" type="number" :label="$t('Data Interval')"
@@ -86,10 +94,19 @@
               :suffix="$t('minutes')" outlined dense>
             </v-text-field>
           </v-col>
-          <!-- battery info -->
-          <v-col cols="6"  class="py-0">
-            <v-text-field v-model.number="battery" type="number" :label="$t('Battery')"
-              suffix="%" disabled outlined dense>
+          <!-- CO2 interval -->
+          <v-col cols="6" class="py-0">
+            <v-text-field v-model.number="CO2IntervalMultiple" type="number" v-if="showHiddenCO2Cfg" :label="$t('CO2 Interval')"
+              :rules="dataIntervalRules"
+              :suffix="(dataInterval * CO2IntervalMultiple + ' '+$t('minutes'))" outlined dense>
+              <template #append>
+                <v-tooltip bottom>
+                  <template #activator="{ on }">
+                    <v-icon v-on="on">mdi-help-circle</v-icon>
+                  </template>
+                  <span>{{$t('CO2 Interval is a multiple of the Data Interval,Please enter the multiple value.')}}</span>
+                </v-tooltip>
+              </template>
             </v-text-field>
           </v-col>
           <!-- mqtt config -->
@@ -255,6 +272,7 @@ export default {
       //
       serialOpened: false,
       showHiddenCfg: false,
+      showHiddenCO2Cfg: false,
       menuContext: 'unknown',  //TODO: change back to unknow when finished
       //config fields
       labelAppEUI: 'App EUI',
@@ -291,6 +309,8 @@ export default {
       apnPassword2: '',
       hwVer: '',
       swVer: '',
+      CO2IntervalMultiple: 1,
+      CO2IntervalMultiple2: 1,
       //stream parse
       stream: null,
       pauseParseLine: false,
@@ -369,6 +389,7 @@ export default {
       let needUpdateApn = (this.apn !== this.apn2)
       let needUpdateApnUsername = (this.apnUsername !== this.apnUsername2)
       let needUpdateApnPassword = (this.apnPassword !== this.apnPassword2)
+      let needCO2IntervalMultiple = (this.CO2IntervalMultiple !== this.CO2IntervalMultiple2)
       console.log({
         needUpdateDeviceEUI: needUpdateDeviceEUI,
         needUpdateAppEUI: needUpdateAppEUI,
@@ -382,12 +403,13 @@ export default {
         needUpdateOta: needUpdateOta,
         needUpdateApn: needUpdateApn,
         needUpdateApnUsername: needUpdateApnUsername,
-        needUpdateApnPassword: needUpdateApnPassword
+        needUpdateApnPassword: needUpdateApnPassword,
+        needCO2IntervalMultiple: needCO2IntervalMultiple
       })
 
       if (!(needUpdateDeviceEUI || needUpdateAppEUI || needUpdateAppKey || needUpdateDataInterval ||
             needUpdateServerAddr || needUpdateServerPort || needUpdateUsername || needUpdatePassword ||
-            needUpdateGPS || needUpdateOta || needUpdateApn || needUpdateApnUsername || needUpdateApnPassword)) {
+            needUpdateGPS || needUpdateOta || needUpdateApn || needUpdateApnUsername || needUpdateApnPassword || needCO2IntervalMultiple)) {
         console.log('no need to write')
         this.writeLoading = false
         return
@@ -441,6 +463,9 @@ export default {
       })
       .then(() => { //APN password
         if (needUpdateApnPassword) return this.writeOne('z', this.apnPassword, 'New APN password', 2000)
+      }) 
+      .then(() => {  //needCO2IntervalMultiple
+        if (needCO2IntervalMultiple) return this.writeOne('q', this.CO2IntervalMultiple, 'New CO2 Interval Multiple', 2000)
       })
       .then(() => { //read back finally to refresh the old value
         this.readFn()
@@ -538,6 +563,14 @@ export default {
         console.log('found Data interval:', found[2])
         this.dataInterval = parseInt(found[2])
         this.dataInterval2 = this.dataInterval
+        return
+      }
+      found = line.match(/CO2 Interval Multiple:\s?(\d+)/i)
+      if (found) {
+        console.log('found CO2 Interval Multiple:', found[1])
+        this.CO2IntervalMultiple = parseInt(found[1])
+        this.CO2IntervalMultiple2 = this.CO2IntervalMultiple
+        this.showHiddenCO2Cfg = true
         return
       }
       found = line.match(/Battery:\s+(\w+)%/i)

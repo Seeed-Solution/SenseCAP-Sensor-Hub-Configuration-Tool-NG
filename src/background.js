@@ -195,7 +195,7 @@ function scheduleOpenGeneralWindow() {
 function createGeneralWindow (showAfterCreated = false) {
   // Create the browser window.
   let w = 600
-  let h = 600
+  let h = 650
 
   if (process.platform === 'win32') {
     h += 30  //for menu bar
